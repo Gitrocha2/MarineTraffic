@@ -1,4 +1,6 @@
-# Flask RestAPI
+# !!!!!!!!!!!!!!!!! DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+## Old Flask RestAPI
 
 ## Requirements
 
@@ -10,7 +12,7 @@
 In the first use, at Admin privileges powershell, you need to execute the commands:
 
 ```shell
-$ cd <YourPath>/RestAPI
+$ cd <YourPath>/``RestAPI
 $ cmd.exe /c 'installvenvs.bat'
 ```
 
