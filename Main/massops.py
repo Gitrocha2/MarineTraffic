@@ -1078,7 +1078,7 @@ def start_local(switch_mode):
                 switch_ship = 1
 
             elif switch_ship == 'analise':
-                analysis_type = str(input("\n  Escolha petróleo(óleo), container(teu):")).lower()
+                #analysis_type = str(input("\n  Escolha petróleo(óleo), container(teu):")).lower()
                 if analysis_type in ['óleo', 'oleo', 'oil', 'petroleo', 'petróleo']:
                     metrics.create_analysis_oil()
                     switch_ship = True
