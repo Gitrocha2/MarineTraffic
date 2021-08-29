@@ -1,12 +1,15 @@
 from Main import massops
+#from Main.datatreat.datatreats import runtreat
+#from Main.datatreat.datatreatloads import runtreatsloads
 
 
 if __name__ == '__main__':
 
     massops.start_local(switch_mode='navios')
 
+    #runtreat()
+    #runtreatsloads()
     print('done')
-
 
 
 '''
