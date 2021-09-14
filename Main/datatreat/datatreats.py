@@ -66,7 +66,7 @@ def runtreat():
                                              'UF':str,
                                              'SGUF':str,
                                              'Região Geográfica':str,
-                                             'Nº da Capitania':str,
+                                             'NdaCapitania':str,
                                              'Nº do IM':int})
         print(y)
 

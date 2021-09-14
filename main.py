@@ -5,7 +5,8 @@ from Main import massops
 
 if __name__ == '__main__':
 
-    massops.start_local(switch_mode='navios')
+    #massops.start_local(switch_mode='navios')
+    massops.test_analysis()
 
     #runtreat()
     #runtreatsloads()
@@ -14,7 +15,7 @@ if __name__ == '__main__':
 
 '''
 
-./Main/database/data/atr_info.db atr_info cargas
+./Main/database/data/atr_info.db loadsinfo cargas
 
 SELECT * FROM loadsinfo WHERE IDAtracacao IN ({loadid})
 

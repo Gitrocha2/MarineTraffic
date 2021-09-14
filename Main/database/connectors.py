@@ -44,7 +44,7 @@ def find_atr_exact(atrid, connection):
 def find_imo_exact(imo, connection):
 
     c = connection.cursor()
-    c.execute("SELECT * FROM atrstats WHERE [Nº do IMO]=:NIMO", {'NIMO': imo})
+    c.execute("SELECT * FROM atrstats WHERE [NdoIMO]=:NIMO", {'NIMO': imo})
 
     result = c.fetchall()
 
@@ -62,7 +62,7 @@ def find_trips_mmyyyy(month, year, connection):
 
     datestring = f'___{month}/{year}'
 
-    c.execute(f"SELECT * FROM atrstats WHERE [Data Chegada] LIKE '{datestring}%' ORDER BY [Data Chegada]")
+    c.execute(f"SELECT * FROM atrstats WHERE [Data Chegada] LIKE '{datestring}%' ORDER BY [DataChegada]")
 
     result = c.fetchall()
 
@@ -105,7 +105,7 @@ def find_imolist_exact(imolist, connection):
 
     #imolist = ", ".join(map(str, imolist))
     c = connection.cursor()
-    c.execute(f"SELECT * FROM atrstats WHERE [Nº do IMO] IN ({imolist})")
+    c.execute(f"SELECT * FROM atrstats WHERE [NdoIMO] IN ({imolist})")
 
     result = c.fetchall()
 
@@ -181,10 +181,10 @@ def find_port_loads(portid, connection):
 def find_imo_blank(connection):
 
     c = connection.cursor()
-    c.execute("SELECT * FROM atrstats WHERE [Nº do IMO] IS NULL "
-              "OR [Nº do IMO] = 0 "
-              "OR [Nº do IMO] = ' ' "
-              "OR TRIM([Nº do IMO]) = ''")
+    c.execute("SELECT * FROM atrstats WHERE [NdoIMO] IS NULL "
+              "OR [NdoIMO] = 0 "
+              "OR [NdoIMO] = ' ' "
+              "OR TRIM([NdoIMO]) = ''")
 
     #c.execute("SELECT * FROM atrstats")
     result = c.fetchall()
@@ -200,7 +200,7 @@ def find_imo_blank(connection):
 def count(connection):
 
     c = connection.cursor()
-    #c.execute("SELECT * FROM atrstats WHERE [Nº do IMO] IS NULL OR [Nº do IMO] = 0 OR [Nº do IMO] = ' ' ")
+    #c.execute("SELECT * FROM atrstats WHERE [NdoIMO] IS NULL OR [NdoIMO] = 0 OR [NdoIMO] = ' ' ")
     c.execute("SELECT COUNT(*) FROM atrstats")
     result = c.fetchall()
 
