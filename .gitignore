@@ -126,3 +126,6 @@ Main/database/data/atr_info.db
 *.txt
 *.db
 
+#Reports files
+Reports/Fleets
+
