@@ -45,7 +45,7 @@ def start_database():
                 SGUF String(32767),
                 "Região Geográfica" String(32767),
                 "Nº da Capitania" String(32767),
-                "Nº do IMO" numeric)""")
+                "NdoIMO" numeric)""")
 
     except:
         print('Database already exists or error in DB creation.')
