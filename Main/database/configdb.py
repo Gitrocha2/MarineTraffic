@@ -44,7 +44,11 @@ def start_database():
                 UF String(32767),
                 SGUF String(32767),
                 "Região Geográfica" String(32767),
+<<<<<<< HEAD
                 "Nº da Capitania" String(32767),
+=======
+                "NdaCapitania" String(32767),
+>>>>>>> 62b49a04980e9cda4169249d33ce387cc1aeda56
                 "NdoIMO" numeric)""")
 
     except:
