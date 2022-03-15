@@ -91,6 +91,7 @@ celerybeat-schedule
 # virtualenv
 .venv
 venv/
+env
 ENV/
 Codenv/
 
@@ -118,7 +119,7 @@ idea/
 .vs
 vs/
 
-#Database files
+# Database files
 Main/database/raw
 Main/database/data
 Main/database/data/atr_info.db
