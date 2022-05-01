@@ -27,6 +27,13 @@ def loads_query(list):
 
     conn = sqlite3.connect('./Main/database/data/atr_info.db')
     result = connectors.find_load_exact(loadid=list, connection=conn)
+
+    print('result sliced', str(result)[0:100], 'result msg:', result['Message'], '\n\n', 'type', type(result))
+
+    if result['Status'] == 0:
+        print('Empty Result for the loads searched.')
+        return pd.DataFrame()
+
     df_trips = pd.DataFrame(result['Message'], columns=["IDCarga",
                                                         "IDAtracacao",
                                                         "Origem",
@@ -80,7 +87,7 @@ def imo_query():
     y = t.time()
 
     if isinstance(result['Message'], str):
-        print('Result Message: \n', result['Message'])
+        print('Result Message: \n', str(result['Message'])[0:100] )
         rerun = input('Deseja consultar novamente? (S ou N): ').lower()
         return rerun
 
@@ -206,7 +213,13 @@ def imo_query():
         idatr_list = df.values.tolist()
 
         u = t.time()
+        print('idatr list', idatr_list)
+
         df_loads = loads_query(list=idatr_list)
+
+        if df_loads.empty:
+            return 's'
+
         v = t.time()
 
         # -------------- Saving DFs to disk ------------------------
@@ -758,7 +771,7 @@ def ploads_query():
     conn.close()
 
     if isinstance(result['Message'], str):
-        print(result['Message'])
+        print('sliced find port loads', str(result['Message'])[0:100])
         rerun = input('Deseja consultar novamente? (S ou N): ').lower()
         return rerun
 
@@ -1039,7 +1052,7 @@ def portships_loop():
     t.sleep(3)
 
 
-# Web components
+# CLI components
 def start_local(switch_mode):
 
     #switch_mode = str(input("\n Deseja buscar portos ou navios? (digite 'portos' ou 'navios' para continuar): ")).lower()
@@ -1078,7 +1091,7 @@ def start_local(switch_mode):
                 switch_ship = 1
 
             elif switch_ship == 'analise':
-                #analysis_type = str(input("\n  Escolha petróleo(óleo), container(teu):")).lower()
+                analysis_type = str(input("\n  Escolha petróleo(óleo), container(teu):")).lower()
                 if analysis_type in ['óleo', 'oleo', 'oil', 'petroleo', 'petróleo']:
                     metrics.create_analysis_oil()
                     switch_ship = True

@@ -127,9 +127,11 @@ def find_load_exact(loadid, connection):
 
     result = c.fetchall()
 
+    print('result loadexact sliced', str(result)[0:100])
+
     if len(result) == 0:
         message = f'Load ID {loadid} not found'
-        result = {'Status': 'ok', 'Message': message}
+        result = {'Status': 0, 'Message': message}
         return result
 
     return {'Status': 'ok', 'Message': result}

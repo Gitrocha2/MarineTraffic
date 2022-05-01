@@ -6,7 +6,7 @@ from Main import massops
 if __name__ == '__main__':
 
     massops.start_local(switch_mode='navios')
-    #massops.test_analysis()
+    # massops.test_analysis()
 
     #runtreat()
     #runtreatsloads()
