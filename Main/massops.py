@@ -67,19 +67,20 @@ def loads_query(list):
     return df_trips
 
 
-def imo_query():
+def imo_query(nimo):
 
-    try:
-        nimo = int(input('\n Insira o Número IMO para gerar relatório (Ou zero para outras consultas): '))
-    except:
-        print('\n Entrada inválida, digite o número IMO apenas.')
-        return 's'
+    #try:
+    #    nimo = int(input('\n Insira o Número IMO para gerar relatório (Ou zero para outras consultas): '))
+    #except:
+    #    print('\n Entrada inválida, digite o número IMO apenas.')
+    #    return 's'
 
     print('\n Salvando dados...')
 
     x = t.time()
     conn = sqlite3.connect('./Main/database/data/atr_info.db')
     if nimo == 0:
+        print('Pesquisando IMO 0')
         result = connectors.find_imo_blank(connection=conn)
     else:
         result = connectors.find_imo_exact(imo=nimo, connection=conn)
@@ -87,9 +88,9 @@ def imo_query():
     y = t.time()
 
     if isinstance(result['Message'], str):
+        print('string message in nimo quero')
         print('Result Message: \n', str(result['Message'])[0:100] )
-        rerun = input('Deseja consultar novamente? (S ou N): ').lower()
-        return rerun
+        return 400
 
     else:
 
@@ -217,8 +218,8 @@ def imo_query():
 
         df_loads = loads_query(list=idatr_list)
 
-        if df_loads.empty:
-            return 's'
+        #if df_loads.empty:
+        #    return 's'
 
         v = t.time()
 
@@ -228,8 +229,17 @@ def imo_query():
         df_loads.to_csv(basepath / 'cargas' / f'Cargas-{nimo}.csv', sep=';', encoding='cp1252', index=False)
         print('\n Finalizado. Tempo total de consulta IMO = ', round((y-x), 2), 'segundos')
         print('\n Tempo total de consulta de viagens = ', round((v - u), 2), 'segundos')
-        rerun = input('\n Deseja consultar novamente? (S ou N):  ').lower()
-        return rerun
+        #rerun = input('\pe[0n Deseja consultar novamente? (S ou N):  ').lower()
+        trips_found = df_trips.shape[0]
+        loads_found = df_loads.shape[0]
+
+        print('Trips found: ', trips_found, 'Loads movements :', loads_found)
+
+        if (trips_found > 0):
+            return 200
+        else:
+            return 400
+
 
 
 def imolist_query(nimo, name, amode):
