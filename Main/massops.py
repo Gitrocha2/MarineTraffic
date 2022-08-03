@@ -28,7 +28,7 @@ def loads_query(list):
     conn = sqlite3.connect('./Main/database/data/atr_info.db')
     result = connectors.find_load_exact(loadid=list, connection=conn)
 
-    print('result sliced', str(result)[0:100], 'result msg:', result['Message'], '\n\n', 'type', type(result))
+    #print('result sliced', str(result)[0:100], 'result msg:', result['Message'], '\n\n', 'type', type(result))
 
     if result['Status'] == 0:
         print('Empty Result for the loads searched.')
@@ -274,7 +274,7 @@ def imolist_query(nimo, name, amode):
 
     if isinstance(result['Message'], str):
         # {'Status': 'ok', 'Message': 'Ship not found'}
-        print('Result Message: \n', result['Message'])
+        #print('Result Message: \n', result['Message'])
         rerun = input('Deseja consultar novamente? (S ou N): ').lower()
         return rerun
 
@@ -345,6 +345,10 @@ def imolist_query(nimo, name, amode):
             'SGUF': 'UF',
             'NdaCapitania': 'Capitania',
             'NdoIMO': 'IMO'})
+
+        print(df_trips.head(3))
+
+        #df_trips.to_csv('./teste_csv')
         # Set datatypes of df columns
         df_trips = df_trips.astype({'IDAtracacao': int,
                                     'TEsperaAtracacao': float,
@@ -361,8 +365,7 @@ def imolist_query(nimo, name, amode):
                                     'FimOp': str,
                                     'TipoNav': str,
                                     'UF': str,
-                                    'Capitania': str,
-                                    'IMO': int})
+                                    'Capitania': str})
         # Collect report metrics
         # tespatr = round(df_trips['TEsperaAtracacao'].mean(), 2)
         # tespop = round(df_trips['TEsperaInicioOp'].mean(), 2)
