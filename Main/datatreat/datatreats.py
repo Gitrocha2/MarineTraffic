@@ -16,10 +16,10 @@ def runtreat():
     #                 'TOperacao', 'TEsperaDesatracacao', 'TAtracado',
     #                 'TEstadia']
 
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
-        atr_tempos[y] = pd.read_csv(tempospath / f'{y}TemposAtracacao.txt',
-                                    sep=';', encoding='utf-8-sig',
+        atr_tempos[y] = pd.read_csv(tempospath / f'{y}TemposAtracacao.txt', delimiter=";", decimal=",",
+                                    encoding='utf-8-sig',
                                     dtype={'IDAtracacao': int,
                                            'TEsperaAtracacao': float,
                                            'TEsperaInicioOp': float,
@@ -37,7 +37,7 @@ def runtreat():
 
     atr_info = {}
 
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
         atr_info[y] = pd.read_csv(atr_infopath / f'{y}Atracacao.csv',
                                       sep=';',
@@ -73,7 +73,7 @@ def runtreat():
     print('df_atrinfo read')
 
     all_atr = {}
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
         all_atr[y] = pd.merge(atr_tempos[y],
                               atr_info[y],
@@ -83,7 +83,7 @@ def runtreat():
 
     df_full_atr = pd.DataFrame()
 
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
         df_full_atr = df_full_atr.append(all_atr[y])
 

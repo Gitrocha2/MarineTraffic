@@ -123,6 +123,7 @@ vs/
 Main/database/raw
 Main/database/data
 Main/database/data/atr_info.db
+Main/database/data/atr_info - backup.db
 *.csv
 *.txt
 *.db

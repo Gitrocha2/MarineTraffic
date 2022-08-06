@@ -1,6 +1,9 @@
 import pandas as pd
 from pathlib import Path
+import csv
 
+
+# VLPESOCARGACONTEINERIZADA >>>>>>> RENAME TO VLPESOCARGACONT
 
 def runtreatsloads():
 
@@ -12,7 +15,7 @@ def runtreatsloads():
 
     full_loads = {}
 
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
         print(y)
 
@@ -30,7 +33,7 @@ def runtreatsloads():
 
     carga_cont = {}
 
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
         print(y)
 
@@ -47,7 +50,7 @@ def runtreatsloads():
     #print(atr_info[2010][0:5])
 
     all_loads = {}
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
         all_loads[y] = pd.merge(full_loads[y],
                                 carga_cont[y],
@@ -59,14 +62,15 @@ def runtreatsloads():
 
     df_full = pd.DataFrame()
 
-    for y in range(2019, 2022):
+    for y in range(2020, 2023):
 
         df_full = df_full.append(all_loads[y])
 
         print(f'appended year {y}')
 
     print('saving dataframe full')
-    df_full.to_csv(basepath / 'raw' / 'all_loads2.csv', sep=',', encoding='utf-8', index=False)
+    df_full.to_csv(basepath / 'raw' / 'all_loads2.csv',
+                   sep=',', encoding='utf-8', index=False)
 
 
     '''
