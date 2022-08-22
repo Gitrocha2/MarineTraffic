@@ -23,10 +23,10 @@ def print_exception():
     return message
 
 
-def loads_query(list):
+def loads_query(alist):
 
     conn = sqlite3.connect('./Main/database/data/atr_info.db')
-    result = connectors.find_load_exact(loadid=list, connection=conn)
+    result = connectors.find_load_exact(loadid=alist, connection=conn)
 
     #print('result sliced', str(result)[0:100], 'result msg:', result['Message'], '\n\n', 'type', type(result))
 
@@ -69,27 +69,22 @@ def loads_query(list):
 
 def imo_query(nimo):
 
-    #try:
-    #    nimo = int(input('\n Insira o Número IMO para gerar relatório (Ou zero para outras consultas): '))
-    #except:
-    #    print('\n Entrada inválida, digite o número IMO apenas.')
-    #    return 's'
-
     print('\n Salvando dados...')
 
     x = t.time()
     conn = sqlite3.connect('./Main/database/data/atr_info.db')
     if nimo == 0:
         print('Pesquisando IMO 0')
-        result = connectors.find_imo_blank(connection=conn)
+        result = {'Message': 0}
+        #result = connectors.find_imo_blank(connection=conn)
     else:
         result = connectors.find_imo_exact(imo=nimo, connection=conn)
     conn.close()
     y = t.time()
 
     if isinstance(result['Message'], str):
-        print('string message in nimo quero')
-        print('Result Message: \n', str(result['Message'])[0:100] )
+        #print('string message in nimo quero')
+        #print('Result Message: \n', str(result['Message'])[0:100] )
         return 400
 
     else:
@@ -102,7 +97,7 @@ def imo_query(nimo):
             mkdir(basepath / 'cargas')
         except:
             print('\n Pasta Já existe')
-            return 'n'
+            return 400
 
         df_trips = pd.DataFrame(result['Message'], columns=["IDAtracacao",
                                                             "TEsperaAtracacao",
@@ -169,7 +164,7 @@ def imo_query(nimo):
             'NdaCapitania': 'Capitania',
             'NdoIMO': 'IMO'})
 
-        df_trips = df_trips.astype({'IDAtracacao': str,
+        df_trips = df_trips.astype({'IDAtracacao': int,
                                     'TEsperaAtracacao': float,
                                     'TEsperaInicioOp': float,
                                     'TOperacao': float,
@@ -187,24 +182,7 @@ def imo_query(nimo):
                                     'Capitania': str,
                                     'IMO': int})
 
-        prancha = 0
-        tope = 1
-        tatr = 2
-        tesp = 3
-        vmed = 4
-        load = 5
-
-        filename = basepath / 'resumo.txt'
-        with open(filename, 'w+') as reports:
-            reports.write(f'Prancha média: {prancha}\n')
-            reports.write(f'Tempo médio de operação: {tope}\n')
-            reports.write(f'Tempo médio de atracação: {tatr}\n')
-            reports.write(f'Tempo médio de espera: {tesp}\n')
-            reports.write(f'Velocidade média: {vmed}\n')
-            reports.write(f'Carga média transportada: {load}\n')
-
         # ----------- Loads report generation -------------------------------
-
         print('\n Consulta de navio concluída. Iniciando consulta por cargas...')
 
         df_aux = df_trips['IDAtracacao'].copy(deep=True)
@@ -214,22 +192,168 @@ def imo_query(nimo):
         idatr_list = df.values.tolist()
 
         u = t.time()
-        print('idatr list', idatr_list)
+        print('idatr list', idatr_list[:5])
 
-        df_loads = loads_query(list=idatr_list)
+        df_loads = loads_query(alist=idatr_list)
 
         #if df_loads.empty:
         #    return 's'
 
         v = t.time()
 
+        try:
+            df_loads['TEU'] = df_loads['TEU'].astype(str)
+            df_loads['TEU'] = df_loads['TEU'].str.replace(',', '.').astype(float).round(0)
+        except:
+            print('cant convert df loads TEU column')
+
+        if df_loads['TEU'].max() == 0:
+            amode = 'oil'
+        else:
+            amode = 'teu'
+
+        print(amode)
+
+        # PRANCHA ---------------------------------------------------- <<<<<<<<<<<<<
+
+        if amode == 'teu':
+            df_loads = df_loads.drop_duplicates(subset='IDCarga', keep="first")
+
+            # -------------- Create merged DF -----------
+            # TODO: Add more slices to improve analysis stats
+            df_loads_slice = df_loads[['IDAtracacao', 'Sentido', 'TEU']]
+
+            df_movs_group = df_loads_slice.groupby(['Sentido'])
+
+            # Load Aggregation
+            df_list = []
+            df_list.append(df_trips)
+            # TEUs Aggregation
+            try:
+                df_teus_in = df_movs_group.get_group('Embarcados')
+                df_teus_in = df_teus_in[['IDAtracacao', 'TEU']]
+                df_teus_in_agg = df_teus_in.groupby(['IDAtracacao']).agg({'TEU': ['sum']})
+                df_teus_in_agg = df_teus_in_agg.reset_index()
+                df_teus_in_agg.columns = ['IDAtracacao', 'TEUs_IN']
+                teus_in = True
+            except:
+                print(' Não há cargas embarcadas')
+                df_teus_in_agg = pd.DataFrame()
+                teus_in = False
+
+            try:
+                df_teus_out = df_movs_group.get_group('Desembarcados')
+                df_teus_out = df_teus_out[['IDAtracacao', 'TEU']]
+                df_teus_out_agg = df_teus_out.groupby(['IDAtracacao']).agg({'TEU': ['sum']})
+                df_teus_out_agg = df_teus_out_agg.reset_index()
+                df_teus_out_agg.columns = ['IDAtracacao', 'TEUs_OUT']
+                teus_out = True
+            except:
+                print(' Não há cargas desembarcadas')
+                df_teus_out_agg = pd.DataFrame()
+                teus_out = False
+
+            df_list.append(df_teus_out_agg)
+            df_list.append(df_teus_in_agg)
+
+            print(' Creating final report.')
+            result_merge = reduce(lambda left, right: pd.merge(left, right, on='IDAtracacao', how='outer'), df_list)
+
+            print('merge done')
+
+            if not teus_in:
+                result_merge['TEUs_IN'] = 0
+            if not teus_out:
+                result_merge['TEUs_OUT'] = 0
+
+            columns_fillna = ['TEsperaAtracacao','TEsperaInicioOp','TOperacao',
+                              'TEsperaDesatracacao','TAtracado','TEstadia','TEUs_IN','TEUs_OUT']
+
+            result_merge[columns_fillna] = result_merge[columns_fillna].fillna(0)
+
+            result_merge.loc[result_merge['TOperacao'] == 0, 'TOperacao'] = result_merge[result_merge['TOperacao'] != 0]['TOperacao'].mean()
+
+            result_merge['TEUS_MOV'] = result_merge['TEUs_OUT'] + result_merge['TEUs_IN']
+
+            result_merge['Prancha_TEU_Hora'] = (result_merge['TEUs_IN'] + result_merge['TEUs_OUT']) / result_merge['TOperacao']
+            # PRANCHA ------------------------------------------- <<<<<<<<<<<<<<
+
+            print(' Organizando diretório de analise.')
+            try:
+                result_merge.to_csv(basepath / 'cargas' / f'Análise-TEUs.csv', sep=';', encoding='cp1252', index=False)
+            except:
+                print('Pasta Já existe')
+
+        elif amode == 'oil':
+            print('oil analysis')
+            df_loads_slice = df_loads[['IDAtracacao', 'Sentido', 'VLPesoCargaBruta']]
+
+
+            try:
+                df_loads_group = df_loads_slice.groupby(['Sentido'])
+                df_loads_in = df_loads_group.get_group('Embarcados')
+                df_loads_in = df_loads_in[['IDAtracacao', 'VLPesoCargaBruta']]
+                df_loads_in_agg = df_loads_in.groupby(['IDAtracacao']).agg({'VLPesoCargaBruta': ['sum']})
+                df_loads_in_agg = df_loads_in_agg.reset_index()
+                df_loads_in_agg.columns = ['IDAtracacao', 'VLPesoCargaBruta_IN']
+                load_in = True
+            except:
+                load_in = False
+                df_loads_in_agg = pd.DataFrame()
+                print('sem carga de entrada')
+            # print(df_loads_in_agg)
+
+            try:
+                df_loads_group = df_loads_slice.groupby(['Sentido'])
+                df_loads_out = df_loads_group.get_group('Desembarcados')
+                df_loads_out = df_loads_out[['IDAtracacao', 'VLPesoCargaBruta']]
+                df_loads_out_agg = df_loads_out.groupby(['IDAtracacao']).agg({'VLPesoCargaBruta': ['sum']})
+                df_loads_out_agg = df_loads_out_agg.reset_index()
+                df_loads_out_agg.columns = ['IDAtracacao', 'VLPesoCargaBruta_OUT']
+                load_out = True
+            except:
+                load_out = False
+                df_loads_out_agg = pd.DataFrame()
+                print('sem carga de saida')
+            # print(df_loads_out_agg)
+
+            # if df_loads_in_agg.shape[0] and df_loads_out_agg.shape[0] == 0:
+            #    df_loads_in_agg = pd.DataFrame()
+            #    df_loads_out_agg = pd.DataFrame()
+                # return error message
+
+            print(' Creating final report.')
+            df_list = [df_trips, df_loads_in_agg, df_loads_out_agg]
+            result_merge = reduce(lambda left, right: pd.merge(left, right, on='IDAtracacao', how='outer'), df_list)
+
+            print('merge done')
+
+            if not load_in:
+                result_merge['VLPesoCargaBruta_IN'] = 0
+            if not load_out:
+                result_merge['VLPesoCargaBruta_OUT'] = 0
+
+            columns_fillna = ['TEsperaAtracacao', 'TEsperaInicioOp', 'TOperacao', 'TEsperaDesatracacao',
+                              'TAtracado', 'TEstadia', 'VLPesoCargaBruta_OUT', 'VLPesoCargaBruta_IN']
+
+            result_merge[columns_fillna] = result_merge[columns_fillna].fillna(0)
+
+            result_merge.loc[result_merge['TOperacao'] == 0, 'TOperacao'] = result_merge[result_merge['TOperacao'] != 0]['TOperacao'].mean()
+
+            result_merge['VLPesoCargaBruta'] = result_merge['VLPesoCargaBruta_OUT'] + result_merge['VLPesoCargaBruta_IN']
+
         # -------------- Saving DFs to disk ------------------------
+            print(' Organizando diretório de analise.')
+            try:
+                result_merge.to_csv(basepath / 'cargas' / f'Análise-OIL.csv', sep=';', encoding='cp1252', index=False)
+            except:
+                print('Pasta Já existe')
 
         df_trips.to_csv(basepath / 'viagens' / f'Viagens-{nimo}.csv', sep=';', encoding='cp1252', index=False)
         df_loads.to_csv(basepath / 'cargas' / f'Cargas-{nimo}.csv', sep=';', encoding='cp1252', index=False)
         print('\n Finalizado. Tempo total de consulta IMO = ', round((y-x), 2), 'segundos')
         print('\n Tempo total de consulta de viagens = ', round((v - u), 2), 'segundos')
-        #rerun = input('\pe[0n Deseja consultar novamente? (S ou N):  ').lower()
+
         trips_found = df_trips.shape[0]
         loads_found = df_loads.shape[0]
 
@@ -383,7 +507,7 @@ def imolist_query(nimo, name, amode):
         # Run query of loads from shiplist history
         print(' List of trips generated. Searching trips in database.')
         u = t.time()
-        df_loads = loads_query(list=idatr_list)
+        df_loads = loads_query(alist=idatr_list)
         v = t.time()
         print(' Query finished.')
         # Slice loads dataframe columns
@@ -616,7 +740,7 @@ def research_query(month, year):
         # Run query of loads from shiplist history
         print(' List of trips generated. Searching trips in database.')
         u = t.time()
-        df_loads = loads_query(list=idatr_list)
+        df_loads = loads_query(alist=idatr_list)
         v = t.time()
         print(' Query finished.')
         # Slice loads dataframe columns
@@ -1083,7 +1207,7 @@ def start_local(switch_mode):
             #switch_ship = 'arquivo'  # shortcut test mode
 
             if switch_ship == 'imo':
-                user_loop(imo_query())
+                user_loop(imo_query(''))
 
             elif switch_ship == 'capitania':
                 user_loop(cap_query())
@@ -1143,3 +1267,4 @@ def start_local(switch_mode):
 def test_analysis():
 
     profile_generator.run_plots()
+

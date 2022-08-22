@@ -5,10 +5,11 @@ from Main.datatreat.datatreatloads import runtreatsloads
 
 if __name__ == '__main__':
 
-#   massops.start_local(switch_mode='navios')
+
+    massops.start_local(switch_mode='navios')
 #   massops.test_analysis()
 #   runtreat()
-    runtreatsloads()
+#   runtreatsloads()
     print('done')
 
 

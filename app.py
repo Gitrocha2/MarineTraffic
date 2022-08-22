@@ -8,6 +8,7 @@ from Main.massops import imo_query, imolist_query
 from threading import *
 from tkinter.font import BOLD, Font
 from pandasgui import show
+from Main.analysis import metrics
 #from Main.analysis import metrics
 #import time as t
 #import shutil
@@ -148,6 +149,8 @@ class TkGui:
                                   column=1,
                                   padx=10, pady=1)
 
+
+
         # ------------ FLEETS TAB
         # self.input_field_fleetname1 = tk.Entry(self.fleetstab)
         # self.input_field_fleetname1.grid(row=2, column=0,
@@ -224,22 +227,22 @@ class TkGui:
 
         user_value = self.input_field_imo.get()
         print('debug1')
-        try:
-            user_int_value = int(user_value)
-            print('debug2', isinstance(user_int_value, int), len(list(user_value)))
-            if (isinstance(user_int_value, int) and (len(list(user_value)) >= 7)):
-                tk.messagebox.showinfo('Processado iniciado',
-                                       f'Por favor aguarde, as informações do navio {user_value} serão consultadas')
-                print('USER VALUE', user_value)
-                imo_query(user_int_value)
-                tk.messagebox.showinfo('Consulta Finalizada',
-                                       f'As informações do navio {user_value} foram obtidas')
-            else:
-                tk.messagebox.showinfo('Entrada inválida',
-                                       'Erro - o código IMO deve conter apenas números e ter mais de 7 digitos')
-        except Exception as e:
+        #try:
+        user_int_value = int(user_value)
+        print('debug2', isinstance(user_int_value, int), len(list(user_value)))
+        if (isinstance(user_int_value, int) and (len(list(user_value)) >= 7)):
+            tk.messagebox.showinfo('Processado iniciado',
+                                   f'Por favor aguarde, as informações do navio {user_value} serão consultadas')
+            print('USER VALUE', user_value)
+            imo_query(user_int_value)
+            tk.messagebox.showinfo('Consulta Finalizada',
+                                   f'As informações do navio {user_value} foram obtidas')
+        else:
             tk.messagebox.showinfo('Entrada inválida',
                                    'Erro - o código IMO deve conter apenas números e ter mais de 7 digitos')
+        #except Exception as e:
+        #    tk.messagebox.showinfo('Entrada inválida',
+        #                           'Erro - o código IMO deve conter apenas números e ter mais de 7 digitos')
 
         self.input_field_imo.delete(0, 'end')
 
@@ -311,7 +314,7 @@ class TkGui:
                 list_of_imos = self.result_my_entry_imos[fleet_number]
                 fleet_name = self.result_my_entry_names[fleet_number]
                 print(fleet_number, list_of_imos, fleet_name)
-                imolist_query(nimo=fleet_number, name=fleet_name, amode='oil')
+                imolist_query(nimo=fleet_number, name=fleet_name, amode='oil')   #NEED TO INPUT THE AMODE MODE VAR!!!
 
                 # imolist_query(fleet)
 
@@ -324,7 +327,7 @@ class TkGui:
     def action_display_dataframe_gui(self):
         print('starting data analysis')
 
-        csv_path = filedialog.askopenfilename(initialdir="/",
+        csv_path = filedialog.askopenfilename(initialdir="./",
                                               title="Select a File",
                                               filetypes=(("Tabular files",
                                                           "*.csv*"),
