@@ -5,6 +5,10 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import GRU, Dense, Embedding
 
+
+#Define the number of epochs
+EPOCH_NUM = 1
+
 # Load the dataset from CSV
 dataset = pd.read_csv('./data/grutrain.csv', sep=';')
 
@@ -40,7 +44,7 @@ model.add(Dense(1))
 model.compile(optimizer='adam', loss='mean_squared_error')
 
 # Train the model
-model.fit(X_train, y_train, epochs=2, batch_size=32)
+model.fit(X_train, y_train, epochs=EPOCH_NUM, batch_size=32)
 
 # Save the trained model
 model.save('./models/gru_model.h5')
@@ -48,6 +52,7 @@ model.save('./models/gru_model.h5')
 # Evaluate the model
 loss = model.evaluate(X_test, y_test)
 print('Loss:', loss)
+
 
 """
 # Predict the queue time for new input data
